@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Calculadora de Prazos</string>
+    <string name="title_activity_main">Calculadora de Prazos</string>
+    <string name="package_name">com.calculadora.prazos</string>
+    <string name="custom_url_scheme">com.calculadora.prazos</string>
+</resources>
