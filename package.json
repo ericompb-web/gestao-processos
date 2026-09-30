@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview --host",
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "cross-env IS_ELECTRON=true npm run build && electron-builder",
+    "electron:build": "cross-env IS_ELECTRON=true npm run build && electron-builder --publish never",
     "cap:sync": "npm run build && npx cap sync",
     "cap:open": "npx cap open android"
   },
