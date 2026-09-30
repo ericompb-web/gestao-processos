@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import CalculadoraPrazos from './pages/CalculadoraPrazos';
 import ProcessosJudiciais from './pages/ProcessosJudiciais';
@@ -9,7 +9,7 @@ import Tarefas from './pages/Tarefas';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<ProcessosJudiciais />} />
@@ -20,6 +20,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
