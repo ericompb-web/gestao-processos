@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://www.tjac.jus.br; base-uri 'none'; form-action 'none'">
+  <title>Calculadora de Prazos PGE-AC</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<header class="topo">
+  <div>
+    <h1>Calculadora de Prazos</h1>
+    <p class="sub">PGE/AC · calendário do Acre e do TJAC · cálculo local, sem envio de dados</p>
+  </div>
+</header>
+
+<main class="pagina">
+  <section class="cartao" aria-labelledby="t-form">
+    <h2 id="t-form">Dados do prazo</h2>
+    <form id="form" novalidate>
+      <fieldset>
+        <legend>A data informada é a da</legend>
+        <label class="opcao"><input type="radio" name="modoData" value="intimacao" checked> Intimação / ciência</label>
+        <label class="opcao"><input type="radio" name="modoData" value="envio"> Envio da intimação eletrônica <span class="dica">(Lei 11.419/2006, art. 5º, § 3º)</span></label>
+      </fieldset>
+
+      <div class="linha">
+        <label class="campo">Data
+          <input type="date" id="data" required>
+        </label>
+        <label class="campo">Quantidade de dias
+          <input type="number" id="quantidade" min="1" max="3650" step="1" inputmode="numeric" value="15" required>
+        </label>
+      </div>
+
+      <fieldset>
+        <legend>Tipo de prazo</legend>
+        <label class="opcao"><input type="radio" name="tipo" value="processual" checked> Processual <span class="dica">dias úteis (CPC, arts. 219 e 224)</span></label>
+        <label class="opcao"><input type="radio" name="tipo" value="material"> Material <span class="dica">dias corridos (CC, art. 132)</span></label>
+        <label class="opcao"><input type="radio" name="tipo" value="personalizado"> Personalizado</label>
+      </fieldset>
+
+      <div id="opcoes-pers" class="subopcoes" hidden>
+        <label class="opcao"><input type="checkbox" id="persFimSemana"> Pular sábados e domingos</label>
+        <label class="opcao"><input type="checkbox" id="persFeriados"> Pular feriados</label>
+        <label class="opcao"><input type="checkbox" id="persProrroga"> Prorrogar o vencimento se cair em dia não útil</label>
+      </div>
+
+      <label class="opcao"><input type="checkbox" id="dobro"> Prazo em dobro da Fazenda Pública <span class="dica">(CPC, art. 183)</span></label>
+      <label class="opcao"><input type="checkbox" id="recesso" checked> Considerar a suspensão de fim de ano <span class="dica">(20/12 a 20/01; só prazo processual)</span></label>
+
+      <label class="campo">Feriados considerados
+        <select id="filtro">
+          <option value="nacional-estadual" selected>Nacionais, estaduais, forenses e do TJAC (sem municipais)</option>
+          <option value="nacional">Somente nacionais</option>
+          <option value="todos">Todos, inclusive municipais</option>
+        </select>
+      </label>
+
+      <p id="erro" class="erro" role="alert" hidden></p>
+      <button type="submit" class="primario">Calcular vencimento</button>
+    </form>
+  </section>
+
+  <section class="cartao resultado" aria-labelledby="t-res" aria-live="polite">
+    <h2 id="t-res">Resultado</h2>
+    <div id="vazio" class="vazio">Preencha os dados e calcule. O vencimento e a memória de cálculo aparecerão aqui.</div>
+    <div id="resultado" hidden>
+      <p class="rotulo">Vencimento</p>
+      <p id="venc" class="venc"></p>
+      <dl class="resumo">
+        <div><dt>Dias efetivos</dt><dd id="r-qtd"></dd></div>
+        <div id="r-ciencia-bloco" hidden><dt>Ciência presumida</dt><dd id="r-ciencia"></dd></div>
+      </dl>
+      <ul id="avisos" class="avisos"></ul>
+      <details id="memoria" open>
+        <summary>Memória de cálculo (dia a dia)</summary>
+        <div class="rolagem"><table class="tabela" id="tab-log">
+          <thead><tr><th>Data</th><th>Dia</th><th>Situação</th></tr></thead><tbody></tbody>
+        </table></div>
+      </details>
+    </div>
+  </section>
+
+  <section class="cartao largo" aria-labelledby="t-fer">
+    <h2 id="t-fer">Feriados</h2>
+    <div class="barra">
+      <label class="campo mini">Ano <input type="number" id="ano" min="1990" max="2200" step="1"></label>
+      <button type="button" id="btn-tjac">Atualizar do TJAC</button>
+      <button type="button" id="btn-exportar">Exportar JSON</button>
+      <button type="button" id="btn-importar">Importar JSON</button>
+      <input type="file" id="arquivo" accept="application/json,.json" hidden>
+    </div>
+    <p id="status-tjac" class="status"></p>
+    <label class="opcao"><input type="checkbox" id="pfTjac"> Ponto facultativo do TJAC conta como dia não útil <span class="dica">(padrão: não)</span></label>
+    <p id="msg-fer" class="status" role="status"></p>
+
+    <div class="rolagem alta"><table class="tabela" id="tab-fer">
+      <thead><tr><th>Data</th><th>Dia</th><th>Nome</th><th>Esfera</th><th>Tipo</th><th>Origem</th><th>Fundamento</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+
+    <h3>Adicionar feriado avulso</h3>
+    <form id="form-extra" class="grade-extra" novalidate>
+      <label class="campo">Data <input type="date" id="x-data" required></label>
+      <label class="campo">Nome <input type="text" id="x-nome" maxlength="200" required></label>
+      <label class="campo">Esfera
+        <select id="x-esfera">
+          <option value="forense">Forense</option><option value="estadual">Estadual</option>
+          <option value="municipal">Municipal</option><option value="nacional">Nacional</option><option value="tjac">TJAC</option>
+        </select>
+      </label>
+      <label class="campo">Tipo
+        <select id="x-tipo"><option value="feriado">Feriado</option><option value="ponto_facultativo">Ponto facultativo</option></select>
+      </label>
+      <label class="campo">Fundamento (opcional) <input type="text" id="x-base" maxlength="300"></label>
+      <button type="submit">Adicionar</button>
+    </form>
+  </section>
+</main>
+
+<footer class="rodape">
+  Ferramenta de apoio. Confira sempre o vencimento nos atos oficiais do tribunal e o calendário vigente. Os dados ficam apenas neste computador.
+</footer>
+<script src="nucleo.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
