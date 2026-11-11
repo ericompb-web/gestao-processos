@@ -1,0 +1,27 @@
+{
+  "name": "calculadora-prazos-pge-ac",
+  "productName": "Calculadora de Prazos PGE-AC",
+  "version": "1.0.0",
+  "description": "Calculadora de prazos processuais, materiais e personalizados (PGE/AC, TJAC). Roda localmente.",
+  "author": "PGE/AC",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test \"testes/*.test.js\"",
+    "dist": "electron-builder --win nsis --publish never"
+  },
+  "devDependencies": {
+    "electron": "^40.6.1",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "br.gov.ac.pge.calculadoraprazos",
+    "productName": "Calculadora de Prazos PGE-AC",
+    "directories": { "output": "dist_instalador" },
+    "files": ["main.cjs", "preload.cjs", "src/**/*", "package.json"],
+    "win": { "target": "nsis", "signAndEditExecutable": false },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "perMachine": false }
+  }
+}
